@@ -1,7 +1,7 @@
 import { assetPrefix, description } from "../config/constants";
 
 export function Head() {
-  const title = "Reading notes";
+  const title = "Next.js 공식문서 스터디";
   return (
     <>
       <meta name="msapplication-TileColor" content="#fff" />
