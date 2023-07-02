@@ -436,9 +436,6 @@ export function Providers({ children }) {
 	)
 }
 ```
-
-이제 루트 레이아웃 내에서 바로 `<Providers />`를 가져와 렌더링할 수 있습니다.
-
 ```jsx filename="app/layout.js"
 import { Providers } from './providers'
 
@@ -453,9 +450,6 @@ export default function RootLayout({ children }) {
 }
 ```
 
-루트에서 렌더링된 프로바이더를 사용하면 이러한 라이브러리의 모든 컴포넌트와 후크가 자체 클라이언트 컴포넌트 내에서 예상대로 작동합니다.
-
-타사 라이브러리가 클라이언트 코드에 "use client"를 추가하면 래퍼 클라이언트 컴포넌트를 제거할 수 있습니다.
 
 ### 서버 컴포넌트 간 데이터 공유
 
