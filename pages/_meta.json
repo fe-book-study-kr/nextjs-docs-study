@@ -1,5 +1,6 @@
 {
 	"index": "introduction",
+  "getting-started": "Getting Started",
 	"page-router": "Page Router",
 	"app-router": "App Router"
 }
