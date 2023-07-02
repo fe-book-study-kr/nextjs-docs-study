@@ -436,6 +436,7 @@ export function Providers({ children }) {
 	)
 }
 ```
+
 ```jsx filename="app/layout.js"
 import { Providers } from './providers'
 
@@ -449,7 +450,6 @@ export default function RootLayout({ children }) {
 	)
 }
 ```
-
 
 ### 서버 컴포넌트 간 데이터 공유
 
@@ -483,4 +483,4 @@ export async function DashboardPage() {
 ### 서버 컴포넌트 간 `fetch` 요청 값 공유
 
 - 여러 컴포넌트에서 하나의 페치데이터 결과를 공유하고 싶을 때, 프롭스로 전달 가능하지만
-- 넥스트에서는 데이터 `fetch`의 중복요청이 있을 때, 에서 자동적으로 캐싱이 이루어지며, 같은 `fetch` 의 결과물을 공유 받을 수 있습니다.
+- 넥스트에서는 데이터 `fetch`의 중복요청이 있을 때, 자동적으로 캐싱이 이루어지며, 같은 `fetch` 의 결과물을 공유 받을 수 있습니다.
