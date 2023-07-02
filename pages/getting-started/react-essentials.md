@@ -15,7 +15,7 @@
 
 #### CSR의 경우
 
-![클라이언트 사이드 랜더링](./react-essentials-csr.png)
+![클라이언트 사이드 렌더링](./react-essentials-csr.png)
 
 - 느린 초기로딩
 - 이후 빠른 반응성
@@ -23,7 +23,7 @@
 
 #### SSR의 경우
 
-![서버 사이드 랜더링](./react-essentials-ssr.png)
+![서버 사이드 렌더링](./react-essentials-ssr.png)
 
 - 빠른 초기 로딩
 - 라우터 전환시마다 페이지 로딩이 필요
@@ -40,33 +40,16 @@
 ## 2. 클라이언트 컴포넌트
 
 - 주로 애플리케이션에 클라이언트 측 인터랙션을 담당
-- 클라이언트 컴포넌트는 넥스트에서 미리 랜더링되어짐.
+- 클라이언트 컴포넌트는 넥스트에서 미리 렌더링되어짐.
   - HTML뼈대 생성
   - 리액트 자바스크립트 채워주기(하이드레이트)
 - 페이지 라우터가 항상 작동하는 방식
 
 ### "use client" 디렉티브
 
-"use client" 디렉티브를 통해 클라이언트 컴포넌트로 동작
+"use client" 지시어를 통해 클라이언트 컴포넌트로 동작
 
 ```tsx filename="app/counter.tsx" highlight={1} switcher
-'use client'
-
-import { useState } from 'react'
-
-export default function Counter() {
-	const [count, setCount] = useState(0)
-
-	return (
-		<div>
-			<p>You clicked {count} times</p>
-			<button onClick={() => setCount(count + 1)}>Click me</button>
-		</div>
-	)
-}
-```
-
-```jsx filename="app/counter.js" highlight={1} switcher
 'use client'
 
 import { useState } from 'react'
@@ -89,7 +72,7 @@ export default function Counter() {
 > - 임포트 문 **위에** 위치
 > - !! **해당 파일에서 임포트한 하위 모듈은 클라이언트 번들로 간주**
 >   - 이 규칙 때문에 본문에서는 경계라고 표현
->   - 클라이언트 컴포넌트의 최상위 컴포넌트만 디렉티브를 사용하면 됌
+>   - 클라이언트 컴포넌트의 최상위 컴포넌트만 디렉티브를 사용하면 댐
 > - 해당 디렉티브가 없는 모든 컴포넌트는 서버 컴포넌트 -> 서버에서만 렌더링
 > - (next의 경우) 클라이언트 컴포넌트는 서버에서 미리 렌더링한 후 클라이언트에 하이드레이션
 >
@@ -142,59 +125,47 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 }
 ```
 
-### 클라이언트 및 서버 컴포넌트 구성하기
+### 컴포넌트의 랜더링
 
-서버 컴포넌트와 클라이언트 컴포넌트는 같은 컴포넌트 트리에서 결합할 수 있습니다.
+1. 서버 : **모든** 서버 컴포넌트 렌더링(클라이언트 컴포넌트 스킵)
+2. 클라이언트 : 클라이언트 컴포넌트 렌더링 + 서버가 렌더링해준 서버컴포넌트 결과값을 *슬롯*에 삽입하여 병합
+3. (참고)넥스트js : 초기 페이지 진입 시 모든 컴포넌트(클라이언트 컴포넌트 포함)가 서버에서 미리 렌더링
 
-백그라운드에서 React는 다음과 같이 렌더링을 처리합니다:
+### 클라이언트 컴포넌트 > 서버 컴포넌트 중첩
 
-- 서버에서 React는 결과를 클라이언트로 보내기 전에 **모든** 서버 컴포넌트를 렌더링합니다.
-  - 여기에는 클라이언트 컴포넌트 안에 중첩된 서버 컴포넌트가 포함됩니다.
-  - 이 단계에서 발생하는 클라이언트 컴포넌트는 건너뜁니다.
-- 클라이언트에서 React는 클라이언트 컴포넌트를 렌더링하고 서버 컴포넌트의 렌더링 결과를 _슬롯에_ 삽입하여 서버와 클라이언트에서 수행한 작업을 병합합니다.
-  - 서버 컴포넌트가 클라이언트 컴포넌트 안에 중첩된 경우, 렌더링된 콘텐츠는 클라이언트 컴포넌트 안에 올바르게 배치됩니다.
-
-> **알아두면 좋은 정보**: Next.js에서는 초기 페이지 로딩 시 위 단계의 서버 컴포넌트와 클라이언트 컴포넌트의 렌더링 결과가 모두 [서버에서 HTML로 미리 렌더링](/docs/app/building-your-application/rendering#static-and-dynamic-rendering-on-the-server)되어 초기 페이지 로딩이 빨라집니다.
-
-### 클라이언트 컴포넌트 안에 서버 컴포넌트 중첩하기
-
-위에서 설명한 렌더링 흐름을 고려할 때 서버 컴포넌트를 클라이언트 컴포넌트로 가져오는 데는 제한이 있는데, 이 접근 방식은 추가 서버 왕복이 필요하기 때문입니다.
-
-#### 지원되지 않는 패턴입니다: 서버 컴포넌트를 클라이언트 컴포넌트로 임포트하기
-
-다음 패턴은 지원되지 않습니다. 서버 컴포넌트를 클라이언트 컴포넌트로 임포트할 수 없습니다:
+#### 잘못된 예 : import {ServerComponent}
 
 ```tsx filename="app/example-client-component.tsx" switcher highlight={5,18}
 'use client'
 
-// 이 패턴은 **작동하지** 않습니다!
-// 서버 컴포넌트를 클라이언트 컴포넌트로 임포트할 수 없습니다.
+// 서버 컴포넌트를 클라이언트 컴포넌트에 임포트하면
+// 이 컴포넌트는 클라이언트 컴포넌트 트리에 종속되어 클라이언트컴포넌트로 작동
 import ExampleServerComponent from './example-server-component'
 
-export default function ExampleClientComponent({
-	children,
-}: {
-	children: React.ReactNode
-}) {
-	const [count, setCount] = useState(0)
-
+export default function ExampleClientComponent() {
 	return (
 		<>
-			<button onClick={() => setCount(count + 1)}>{count}</button>
-
 			<ExampleServerComponent />
 		</>
 	)
 }
 ```
 
-#### 권장 패턴: 서버 컴포넌트를 클라이언트 컴포넌트에 프롭으로 전달하기
+#### 잘된 예: {children} 서버 컴포넌트 프롭 전달
 
-대신, 클라이언트 컴포넌트를 디자인할 때 React 프로퍼티를 사용하여 서버 컴포넌트에 "슬롯"을 표시할 수 있습니다.
+```tsx filename="app/page.tsx"  highlight={11} switcher
+// "use client" 디렉티브가 없는 서버컴포넌트(기본값) 
+import ExampleClientComponent from './example-client-component'
+import ExampleServerComponent from './example-server-component'
 
-서버 컴포넌트는 서버에서 렌더링되고 클라이언트 컴포넌트가 클라이언트에서 렌더링될 때 "슬롯"은 서버 컴포넌트의 렌더링된 결과로 채워집니다.
-
-일반적인 패턴은 React `children` 프로퍼티를 사용해 "슬롯"을 생성하는 것입니다. 일반적인 `children` 프로퍼티를 허용하도록 `<ExampleClientComponent>`를 리팩터링하고 `<ExampleClientComponent>`의 임포트와 명시적 중첩을 부모 컴포넌트로 옮길 수 있습니다.
+export default function Page() {
+	return (
+		<ExampleClientComponent> <- 클라이언트 컴포넌트
+			<ExampleServerComponent /> <- 서버 컴포넌트 프롭전달
+		</ExampleClientComponent>
+	)
+}
+```
 
 ```tsx filename="app/example-client-component.tsx" switcher highlight={6,16}
 'use client'
@@ -202,53 +173,23 @@ export default function ExampleClientComponent({
 import { useState } from 'react'
 
 export default function ExampleClientComponent({
-	children,
+	children, // <- 여기로 서버컴포넌트 전달
 }: {
 	children: React.ReactNode
 }) {
-	const [count, setCount] = useState(0)
-
 	return (
 		<>
-			<button onClick={() => setCount(count + 1)}>{count}</button>
-
-			{children}
+			...
+			{children} <-슬롯으로 병합
 		</>
 	)
 }
 ```
-
-이제 `<ExampleClientComponent>`는 `children`이 무엇인지 전혀 알지 못합니다. 사실, `자식`이 결국 서버 컴포넌트의 결과에 의해 채워질 것이라는 사실조차 알지 못합니다.
-
-`예제 클라이언트 컴포넌트`가 할 수 있는 유일한 책임은 결국 `자식`이 어디에 위치할지 결정하는 것뿐입니다.
-
-부모 서버 컴포넌트에서 `<ExampleClientComponent>`와 `<ExampleServerComponent>`를 모두 임포트하고 `<ExampleServerComponent>`를 `<ExampleClientComponent>`의 자식으로 전달할 수 있습니다:
-
-```tsx filename="app/page.tsx"  highlight={11} switcher
-// 이 패턴이 작동합니다:
-// 서버 컴포넌트를 클라이언트 컴포넌트의 자식이나 프로퍼티로 전달할 수 있습니다.
-// 클라이언트 컴포넌트의 자식 또는 프로퍼티로 전달할 수 있습니다.
-import ExampleClientComponent from './example-client-component'
-import ExampleServerComponent from './example-server-component'
-
-// Next.js의 페이지는 기본적으로 서버 컴포넌트입니다.
-export default function Page() {
-	return (
-		<ExampleClientComponent>
-			<ExampleServerComponent />
-		</ExampleClientComponent>
-	)
-}
-```
-
-이 접근 방식을 사용하면 `<예제 클라이언트 컴포넌트>`와 `<예제 서버 컴포넌트>`의 렌더링이 분리되어 독립적으로 렌더링될 수 있으며, 클라이언트 컴포넌트보다 먼저 서버에서 렌더링되는 서버 컴포넌트에 맞춰 조정됩니다.
-
-> **알아두면 좋은 정보**
+> **참고**
 >
-> - 이 패턴은 [레이아웃과 페이지](/docs/app/building-your-application/routing/pages-and-layouts)에 `children` 프로퍼티로 **이미 적용**되어 있으므로 추가 래퍼 컴포넌트를 만들 필요가 없습니다.
-> - React 컴포넌트(JSX)를 다른 컴포넌트에 전달하는 것은 새로운 개념이 아니며 항상 React 컴포지션 모델의 일부였습니다.
-> - 이 컴포지션 전략은 서버와 클라이언트 컴포넌트 모두에서 작동하는데, 소품을 받는 컴포넌트는 소품이 무엇인지 전혀 모르기 때문입니다. 단지 전달받은 소품이 어디에 배치되어야 하는지에 대해서만 책임이 있습니다. - 전달된 소품이 클라이언트 컴포넌트가 클라이언트에서 렌더링되기 훨씬 전에 서버에서 독립적으로 렌더링될 수 있습니다. - 가져온 중첩된 자식 컴포넌트를 다시 렌더링하는 부모 컴포넌트의 상태 변화를 피하기 위해 "콘텐츠 리프팅"이라는 동일한 전략이 사용되었습니다.
-> - `children` 프로퍼티에만 국한되지 않습니다. 어떤 프롭을 사용해도 JSX를 전달할 수 있습니다.
+> - 컴포지션 전략 : 이 패턴은 레이아웃과 페이지에 `children` 프로퍼티로 **이미 적용**되어 사용
+> - 컨텐츠 리프팅 전략 : 자식컴포넌트의 상태가 변경되었을때 자식컴포넌트를 리랜더링 하지 않고 부모컴포넌트에서 자식 컴포넌트 상태를 가져와서 리랜더링. 이 패턴에서도 사용됌
+> - `children` 프롭 외에 어떤 프롭을 사용해도 JSX를 전달할 수 있습니다
 
 ### 서버에서 클라이언트 컴포넌트로 프롭 전달하기(직렬화)
 
