@@ -1,4 +1,5 @@
 {
-  "index": "Introduction",
-  "books": "Reading notes"
+	"index": "introduction",
+	"page-router": "Page Router",
+	"app-router": "App Router"
 }
