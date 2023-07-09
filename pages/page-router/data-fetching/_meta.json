@@ -1,0 +1,4 @@
+{
+  "getStaticProps": "getStaticProps",
+  "getStaticPaths": "getStaticPaths"
+}
